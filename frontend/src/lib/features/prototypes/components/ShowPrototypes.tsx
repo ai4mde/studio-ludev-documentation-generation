@@ -200,7 +200,6 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                             className={`px-2 rounded-md ${
                                                 loading[e.name] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
                                             } text-white`}
-
                                         >
                                             Kill
                                         </button>
