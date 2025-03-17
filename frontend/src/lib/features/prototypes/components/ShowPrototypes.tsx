@@ -10,10 +10,9 @@ import { useParams } from "react-router";
 
 
 type Props = {
-    system: string;
 };
 
-export const ShowPrototypes: React.FC<Props> = ({ system }) => {
+export const ShowPrototypes: React.FC<Props> = () => {
     const { systemId } = useParams();
     const [data, isSuccess] = useSystemPrototypes(systemId);
     const [prototypeStatuses, setPrototypeStatuses] = useState<{ [key: string]: string }>({});
@@ -24,14 +23,14 @@ export const ShowPrototypes: React.FC<Props> = ({ system }) => {
 
     const queryClient = useQueryClient();
     useEffect(() => {
-        queryClient.invalidateQueries(["prototypes", systemId]);
+        queryClient.invalidateQueries({ queryKey: ['prototypes', systemId] })
     }, [queryClient, systemId]);
 
     useEffect(() => {
         const fetchActivePrototype = async () => {
             try {
                 const response = await authAxios.get(`/v1/generator/prototypes/active_prototype/`);
-                const activePrototypeName = response.data.prototype_name;
+                const activePrototypeId = response.data.prototype_id;
                 const isRunning = response.data.running;
 
                 if (data) {
@@ -86,15 +85,15 @@ export const ShowPrototypes: React.FC<Props> = ({ system }) => {
         await handleDeleteAll();
     };
 
-    const handleRun = async (prototypeName: string) => {
-        setLoading((prev) => ({ ...prev, [prototypeName]: true }));
+    const handleRun = async (prototypeId: string) => {
+        setLoading((prev) => ({ ...prev, [prototypeId]: true }));
         try {
-            await authAxios.post(`/v1/generator/prototypes/run/${prototypeName}`);
+            await authAxios.post(`/v1/generator/prototypes/run/${prototypeId}`);
         } catch (error) {
             console.error('Error making run request:', error);
         } finally {
             setTimeout(() => {
-                setLoading((prev) => ({ ...prev, [prototypeName]: false }));
+                setLoading((prev) => ({ ...prev, [prototypeId]: false }));
             }, 6000);
         }
     };
@@ -107,7 +106,7 @@ export const ShowPrototypes: React.FC<Props> = ({ system }) => {
             console.error('Error making stop request:', error);
         } finally {
             setTimeout(() => {
-                setLoading((prev) => ({ ...prev, [prototypeName]: false }));
+                setLoading((prev) => ({ ...prev, [prototypeId]: false }));
             }, 6000);
         }
     };
@@ -162,12 +161,12 @@ export const ShowPrototypes: React.FC<Props> = ({ system }) => {
                                     <h2 className="text-stone-400">{e.description}</h2>
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200">
-                                    {prototypeStatuses[e.name] || (
+                                    {prototypeStatuses[e.id] || (
                                         <CircularProgress className="animate-spin" />
                                     )}
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200">
-                                    {(prototypeStatuses[e.name] === "Running") &&
+                                    {(prototypeStatuses[e.id] === "Running") &&
                                         <a href={prototypeURL} target="_blank" className="text-blue-500 hover:underline">
                                             {prototypeURL}
                                         </a>
@@ -194,18 +193,19 @@ export const ShowPrototypes: React.FC<Props> = ({ system }) => {
                                         <FileText className="size-4 mr-2 shrink-0" />
                                         Metadata
                                     </button>
-                                    { prototypeStatuses[e.name] === "Running" && (
+                                    {prototypeStatuses[e.id] === "Running" && (
                                         <button
                                             onClick={() => handleStop(e.name)}
                                             disabled={loading[e.name]}
                                             className={`px-2 rounded-md ${
                                                 loading[e.name] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
                                             } text-white`}
+
                                         >
                                             Kill
                                         </button>
                                     )}
-                                    { prototypeStatuses[e.name] === "Not running" && (
+                                    {prototypeStatuses[e.id] === "Not running" && (
                                         <button
                                             onClick={() => handleRun(e.name)}
                                             disabled={loading[e.name]}
