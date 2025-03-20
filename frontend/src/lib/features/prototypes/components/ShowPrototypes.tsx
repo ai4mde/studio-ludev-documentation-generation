@@ -4,7 +4,7 @@ import { useSystemPrototypes } from "$lib/features/prototypes/queries";
 import { prototypeURL } from "$shared/globals";
 import { Button, CircularProgress, Divider, Modal, ModalClose, ModalDialog } from '@mui/joy';
 import { useQueryClient } from "@tanstack/react-query";
-import { Package, Trash } from "lucide-react";
+import { BookText, FileText, Package, Play, Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
@@ -172,11 +172,25 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                         </a>
                                     }
                                 </td>
-                                <td className="py-2 px-4 text-left border-b border-gray-200 w-60 flex space-x-2">
+                                <td className="py-2 px-4 text-left border-b border-gray-200  flex space-x-2">
+
+                                <button
+                                        onClick={() => {
+                                            // FIXME: Do something
+                                            console.error("Not implemented yet");
+                                        }}
+                                        className="w-[80px] h-[40px] bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center shrink-0"
+                                    >
+                                        <BookText className="size-4 mr-2 shrink-0" />
+                                        Docs
+                                    </button>
+
                                     <button
                                         onClick={() => showMetadata(e.id)}
-                                        className="w-[100px] h-[40px] bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center"
+                                        className="px-2 bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center shrink-0"
+
                                     >
+                                        <FileText className="size-4 mr-2 shrink-0" />
                                         Metadata
                                     </button>
                                     {prototypeStatuses[e.id] === "Running" && (
@@ -196,14 +210,15 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                             className={`w-[60px] h-[40px] rounded-md ${loading[e.id] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
                                                 } text-white`}
                                         >
+                                            <Play className="size-4 mr-2 shrink-0" />
                                             Run
                                         </button>
                                     )}
                                     <button
                                         onClick={() => handleDelete(e.id)}
-                                        className="w-[40px] h-[40px] bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center justify-center"
+                                        className="w-[40px] h-[40px] bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center justify-center shrink-0"
                                     >
-                                        <Trash />
+                                        <Trash className="size-5" />
                                     </button>
                                 </td>
                             </tr>
