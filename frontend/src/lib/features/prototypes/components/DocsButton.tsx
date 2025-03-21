@@ -9,30 +9,36 @@ export function DocsButton() {
     const [copied, setCopied] = useState(false);
 
     const showDocs = async () => {
+
+        if (docs.length > 0) {
+            setShowDocsModal(true);
+            return;
+        }
+
         setDocsLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setDocs(`
-            # UML Prototype Documentation
+# UML Prototype Documentation
 
-            ## Table of Contents
-            1. [Introduction](#introduction)
-            2. [Project Overview](#project-overview)
-            3. [Design Goals](#design-goals)
-            4. [UML Diagrams](#uml-diagrams)
-               - [Class Diagram](#class-diagram)
-               - [Sequence Diagram](#sequence-diagram)
-               - [Use Case Diagram](#use-case-diagram)
-               - [Activity Diagram](#activity-diagram)
-            5. [Component Descriptions](#component-descriptions)
-            6. [Assumptions and Constraints](#assumptions-and-constraints)
-            7. [Future Enhancements](#future-enhancements)
-            8. [References](#references)
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Project Overview](#project-overview)
+3. [Design Goals](#design-goals)
+4. [UML Diagrams](#uml-diagrams)
+   - [Class Diagram](#class-diagram)
+   - [Sequence Diagram](#sequence-diagram)
+   - [Use Case Diagram](#use-case-diagram)
+   - [Activity Diagram](#activity-diagram)
+5. [Component Descriptions](#component-descriptions)
+6. [Assumptions and Constraints](#assumptions-and-constraints)
+7. [Future Enhancements](#future-enhancements)
+8. [References](#references)
 
-            ---
+---
 
-            ## Introduction
+## Introduction
 
-            This document provides an overview and detailed description of the UML prototype. It is intended to help developers, designers, and stakeholders understand the system architecture, relationships, and interactions.
+This document provides an overview and detailed description of the UML prototype. It is intended to help developers, designers, and stakeholders understand the system architecture, relationships, and interactions.
 
     `);
         setShowDocsModal(true);
@@ -40,7 +46,6 @@ export function DocsButton() {
     };
 
     const closeDocs = () => {
-        setDocs("");
         setShowDocsModal(false);
     };
 
