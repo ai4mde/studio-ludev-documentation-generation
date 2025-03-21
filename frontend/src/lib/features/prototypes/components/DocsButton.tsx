@@ -1,5 +1,5 @@
 import { Modal, ModalDialog } from '@mui/joy';
-import { BookText, Check, Copy, Loader2, X } from "lucide-react";
+import { BookText, Check, Copy, Loader2, Save, X } from "lucide-react";
 import { useState } from "react";
 
 export function DocsButton() {
@@ -74,16 +74,29 @@ This document provides an overview and detailed description of the UML prototype
                         >
                             <X className="size-5" />
                         </button>
+
+                        <div className="flex gap-2">
+
                         <button
                             onClick={copyDocs}
                             className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
-                        >
+                            >
                             {copied ? <Check className="size-5" /> : <Copy className="size-5" />}
+                            </button>
+
+
+                            <button
+                                onClick={() => { }}
+                            className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
+                        >
+                            <Save className="size-5" />
                         </button>
+
+                            </div>
                     </div>
 
                     <div className="flex h-full w-full flex-col gap-1 p-3">
-                        <pre>{docs}</pre>
+                        <pre contenteditable>{docs}</pre>
                     </div>
                 </ModalDialog>
             </Modal>
