@@ -4,9 +4,10 @@ import { useSystemPrototypes } from "$lib/features/prototypes/queries";
 import { prototypeURL } from "$shared/globals";
 import { Button, CircularProgress, Divider, Modal, ModalClose, ModalDialog } from '@mui/joy';
 import { useQueryClient } from "@tanstack/react-query";
-import { BookText, FileText, Package, Play, Trash } from "lucide-react";
+import { FileText, Package, Play, Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { DocsButton } from "./DocsButton";
 
 
 type Props = {
@@ -20,6 +21,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
     const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
     const [metadata, setMetadata] = useState("");
     const [showMetadataModal, setShowMetadataModal] = useState(false);
+
 
     const queryClient = useQueryClient();
     useEffect(() => {
@@ -122,10 +124,14 @@ export const ShowPrototypes: React.FC<Props> = () => {
         }
     }
 
+
+
     const closeMetadataModal = () => {
         setMetadata("");
         setShowMetadataModal(false);
     }
+
+
 
     return (
         <>
@@ -174,16 +180,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200  flex space-x-2">
 
-                                <button
-                                        onClick={() => {
-                                            // FIXME: Do something
-                                            console.error("Not implemented yet");
-                                        }}
-                                        className="w-[80px] h-[40px] bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center shrink-0"
-                                    >
-                                        <BookText className="size-4 mr-2 shrink-0" />
-                                        Docs
-                                    </button>
+                               <DocsButton />
 
                                     <button
                                         onClick={() => showMetadata(e.id)}
@@ -273,6 +270,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
                     </div>
                 </ModalDialog>
             </Modal>
+
         </>
     );
 };
