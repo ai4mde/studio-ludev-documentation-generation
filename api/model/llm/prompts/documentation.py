@@ -5,7 +5,7 @@ Your task is to generate comprehensive documentation for the following system's 
 Ensure the documentation covers the following sections:
 
 1. **Overview and Purpose:**
-   - Provide a summary of the project or system represented by the UML diagram.
+   - Provide a high-level summary of the project or system represented by the UML diagram.
    - Describe the objectives and goals of the system, referencing relevant metadata such as project and system definitions.
 
 2. **System Architecture:**
@@ -17,16 +17,16 @@ Ensure the documentation covers the following sections:
    - For each endpoint, include:
      - URL
      - HTTP method (GET, POST, PUT, DELETE)
-     - Functionality description
+     - A description of the endpoint's purpose and how it fits into the overall system
      - Request parameters and types
      - Example request and response formats
 
 4. **Usage Scenarios:**
-   - Provide example use cases of the system.
+   - Provide real-world example use cases or user stories that demonstrate how the system is used.
    - Show interactions between actors (e.g., Manager in the web shop) and the system, as well as input data and expected results.
 
 5. **Installation and Setup:**
-   - Provide installation instructions for setting up the system, database, and any dependencies.
+   - Provide detailed, step-by-step installation instructions for setting up the system, database, and any dependencies.
    - Include configuration details for the user interface and prototypes.
 
 6. **Metadata Details:**
@@ -43,7 +43,7 @@ Ensure the documentation covers the following sections:
 **Formatting Requirements:**
 - Format the documentation in Markdown.
 - Use clear headings, subheadings, bullet points, and code blocks where appropriate.
-- Ensure the documentation is organized, clear, and user-friendly for developers and system administrators.
+- Ensure the documentation is well-structured, clear, and user-friendly for developers and system administrators.
 
  Make sure the output documentation is well-structured, thorough, and clearly written.
 """
