@@ -33,6 +33,13 @@ Ensure the documentation covers the following sections:
    - Explain the metadata structure, including classifications, relations, and the system’s user interface components.
    - Ensure you describe the JSON snapshots of diagrams, metadata, and interfaces used in prototypes.
 
+7. **Prototype Documentation**:
+   - The prototype details include:
+     - **Name**: "{data[name]}"
+     - **Description**: "{data[description]}"
+     - **Metadata**: "{data[metadata]}"
+   - Ensure this prototype information is clear and well-described in the generated documentation.
+
 **Formatting Requirements:**
 - Format the documentation in Markdown.
 - Use clear headings, subheadings, bullet points, and code blocks where appropriate.
