@@ -1,4 +1,4 @@
-GENERATE_DOCUMENTATION_PROMPT = """
+PROTOTYPE_GENERATE_DOCUMENTATION = """
 You are an expert technical writer with deep knowledge of metadata models and software documentation. 
 Your task is to generate comprehensive documentation for the following system's UML diagrams, metadata, and prototype information.
 
