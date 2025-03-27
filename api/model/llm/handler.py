@@ -3,7 +3,7 @@ from typing import Dict, Any
 from groq import Groq
 from openai import OpenAI
 from llm.prompts.diagram import DIAGRAM_GENERATE_ATTRIBUTE, DIAGRAM_GENERATE_METHOD
-
+from llm.prompts.documentation import PROTOTYPE_GENERATE_DOCUMENTATION
 
 def remove_reply_markdown(reply: str) -> str:
     lines = reply.splitlines()
@@ -60,6 +60,8 @@ def llm_handler(prompt_name: str, model: str = "mixtral-8x7b-32768", input_data:
         prompt = DIAGRAM_GENERATE_ATTRIBUTE.format(data=input_data)
     elif prompt_name == "DIAGRAM_GENERATE_METHOD":
         prompt = DIAGRAM_GENERATE_METHOD.format(data=input_data)
+    elif prompt_name == "PROTOTYPE_GENERATE_DOCUMENTATION":
+        prompt = PROTOTYPE_GENERATE_DOCUMENTATION.format(data=input_data)
     else:
         raise Exception("Invalid prompt name")
     
