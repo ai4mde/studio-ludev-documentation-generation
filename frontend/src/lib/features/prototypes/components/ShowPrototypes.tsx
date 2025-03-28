@@ -21,6 +21,8 @@ export const ShowPrototypes: React.FC<Props> = () => {
     const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
     const [metadata, setMetadata] = useState("");
     const [showMetadataModal, setShowMetadataModal] = useState(false);
+    const [docs, setDocs] = useState("");
+    const [showDocsModal, setShowDocsModal] = useState(false);
 
 
     const queryClient = useQueryClient();
@@ -124,7 +126,24 @@ export const ShowPrototypes: React.FC<Props> = () => {
         }
     }
 
+    const showDocs = async (prototypeId: string) => {
+        try {
+            const response = await authAxios.get(`/v1/generator/prototypes/${prototypeId}/docs`, {
+                method: "POST",
+                credentials: "include",
+            });
 
+            setDocs(response.data);
+            setShowDocsModal(true);
+        } catch (error) {
+            console.error('Error generating docs:', error);
+        }
+    };
+
+    const closeDocsModal = () => {
+        setDocs("");
+        setShowDocsModal(false);
+    };
 
     const closeMetadataModal = () => {
         setMetadata("");
@@ -180,7 +199,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200  flex space-x-2">
 
-                               <DocsButton />
+                                    <DocsButton />
 
                                     <button
                                         onClick={() => showMetadata(e.id)}
@@ -189,6 +208,12 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                     >
                                         <FileText className="size-4 mr-2 shrink-0" />
                                         Metadata
+                                    </button>
+                                    <button
+                                        onClick={() => showDocs(e.id)}
+                                        className="px-2 bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center shrink-0"
+                                    >
+                                        <FileText className="size-4 mr-2 shrink-0" /> Generate Docs
                                     </button>
                                     {prototypeStatuses[e.id] === "Running" && (
                                         <button
@@ -265,6 +290,21 @@ export const ShowPrototypes: React.FC<Props> = () => {
                     />
                     <div className="flex h-full w-full flex-col gap-1 p-3">
                         <pre>{JSON.stringify(metadata, null, 2)}</pre>
+                    </div>
+                </ModalDialog>
+            </Modal>
+            <Modal
+                open={showDocsModal}
+                onClose={closeDocsModal}
+            >
+                <ModalDialog className="max-h-screen overflow-y-auto">
+                    <ModalClose
+                        sx={{
+                            position: "relative",
+                        }}
+                    />
+                    <div className="flex h-full w-full flex-col gap-1 p-3">
+                        <pre>{docs}</pre>
                     </div>
                 </ModalDialog>
             </Modal>
