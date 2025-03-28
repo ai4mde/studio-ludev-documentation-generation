@@ -6,6 +6,7 @@ from ninja import Router
 import json
 import requests
 import os
+from llm.handler import llm_handler, remove_reply_markdown
 
 prototypes = Router()
 
@@ -166,63 +167,21 @@ def get_active_prototype(request):
 
 
 
-@prototypes.post("/{uuid:id}/docs/", response=Dict)
+@prototypes.post("/{uuid:id}/docs/", response=str)
 def generate_prototype_docs(request, id):
-    # Get Groq API key from environment variables
-    groq_api_key = os.environ.get('GROQ_API_KEY')
-    if not groq_api_key:
-        return 400, {"error": "GROQ_API_KEY not found in environment variables"}
-    
-    # Get the prototype by ID
-    try:
-        prototype = Prototype.objects.get(id=id)
-    except Prototype.DoesNotExist:
-        return 404, {"error": "Prototype not found"}
-    
-    # Define the system prompt
-    system_prompt = """You are a technical documentation expert. Create comprehensive documentation 
-    for the following prototype. Include:
-    - Overview and purpose
-    - Technical architecture
-    - API endpoints and their functionality
-    - Example usage scenarios
-    - Installation requirements
-    Format the documentation in Markdown."""
-    
-    # Create the request to Groq API
-    groq_api_url = "https://api.groq.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {groq_api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "llama3-70b-8192",
-        "messages": [
-            {
-                "role": "system",
-                "content": system_prompt
-            },
-            {
-                "role": "user",
-                "content": f"Generate documentation for the prototype named '{prototype.name}'. Description: {prototype.description}. Metadata: {json.dumps(prototype.metadata)}"
-            }
-        ],
-        "temperature": 0.7,
-        "max_tokens": 2048
-    }
-    
-    # Make the request to Groq API
-    try:
-        response = requests.post(groq_api_url, headers=headers, json=payload)
-        
-        if response.status_code == 200:
-            result = response.json()
-            documentation = result["choices"][0]["message"]["content"]
-            return {"documentation": documentation}
-        else:
-            return response.status_code, {"error": f"Groq API error: {response.text}"}
-    except Exception as e:
-        return 500, {"error": f"Failed to generate documentation: {str(e)}"}
+    prototype = Prototype.objects.get(id=id)
+    if not prototype:
+        return 404, "Prototype not found"
+
+    reply = llm_handler(prompt_name = "GENERATE_DOCUMENTATION_PROMPT",
+                         model = "llama-3.2-1b-preview",
+                         input_data = {
+                            "name": prototype.name,
+                            "description": prototype.description,
+                            "metadata": prototype.metadata,
+                         })
+
+    return remove_reply_markdown(reply)
 
 
 
