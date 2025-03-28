@@ -6,6 +6,7 @@ from ninja import Router
 import json
 import requests
 import os
+from llm.handler import llm_handler, remove_reply_markdown
 
 prototypes = Router()
 
@@ -97,7 +98,7 @@ def delete_system_prototypes(request, system_id):
     prototypes = Prototype.objects.filter(system=System.objects.get(pk=system_id))
     if not prototypes:
         return False
-    
+
     for prototype in prototypes:
         data = {
             'id': str(prototype.id),
@@ -113,7 +114,7 @@ def delete_system_prototypes(request, system_id):
 
 @prototypes.put("/{uuid:id}/", response=bool)
 def update_prototype(request, id, prototype: UpdatePrototype):
-    try: 
+    try:
         Prototype.objects.filter(id=id).update(name=prototype.name,
                                                description=prototype.description,
                                                system=prototype.system,
@@ -130,7 +131,7 @@ def stop_prototypes(request):
         response = requests.post(STOP_URL)
     except:
         return False
-    
+
     if response.status_code == 200:
         return True
     return False
@@ -141,7 +142,7 @@ def run_prototype(request, prototype_id):
     prototype = Prototype.objects.get(id=prototype_id)
     if not prototype:
         return False
-    
+
     RUN_URL = f"{PROTOTYPE_API_URL}/run"
     data = {
         'id': str(prototype.id),
@@ -152,7 +153,7 @@ def run_prototype(request, prototype_id):
         response = requests.post(RUN_URL, json=data)
     except:
         return False
-    
+
     if response.status_code in [200, 307]:
         return True
     return False
@@ -163,6 +164,25 @@ def get_active_prototype(request):
     STATUS_URL = f"{PROTOTYPE_API_URL}/active_prototype"
     response = requests.get(STATUS_URL)
     return response.json()
+
+
+
+@prototypes.post("/{uuid:id}/docs/", response=str)
+def generate_prototype_docs(request, id):
+    prototype = Prototype.objects.get(id=id)
+    if not prototype:
+        return 404, "Prototype not found"
+
+    reply = llm_handler(prompt_name = "PROTOTYPE_GENERATE_DOCUMENTATION",
+                         model = "llama-3.2-1b-preview",
+                         input_data = {
+                            "name": prototype.name,
+                            "description": prototype.description,
+                            "metadata": prototype.metadata,
+                         })
+
+    return remove_reply_markdown(reply)
+
 
 
 __all__ = ["prototypes"]
