@@ -1,21 +1,32 @@
 import { authAxios } from "$lib/features/auth/state/auth";
-import { deletePrototype, deleteSystemPrototypes } from "$lib/features/prototypes/mutations";
+import {
+    deletePrototype,
+    deleteSystemPrototypes,
+} from "$lib/features/prototypes/mutations";
 import { useSystemPrototypes } from "$lib/features/prototypes/queries";
 import { prototypeURL } from "$shared/globals";
-import { Button, CircularProgress, Divider, Modal, ModalClose, ModalDialog } from '@mui/joy';
+import {
+    Button,
+    CircularProgress,
+    Divider,
+    Modal,
+    ModalClose,
+    ModalDialog,
+} from "@mui/joy";
 import { useQueryClient } from "@tanstack/react-query";
-import { Package, Trash } from "lucide-react";
+import { FileText, Package, Play, Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { DocsButton } from "./DocsButton";
 
-
-type Props = {
-};
+type Props = {};
 
 export const ShowPrototypes: React.FC<Props> = () => {
     const { systemId } = useParams();
     const [data, isSuccess] = useSystemPrototypes(systemId);
-    const [prototypeStatuses, setPrototypeStatuses] = useState<{ [key: string]: string }>({});
+    const [prototypeStatuses, setPrototypeStatuses] = useState<{
+        [key: string]: string;
+    }>({});
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
     const [metadata, setMetadata] = useState("");
@@ -23,13 +34,15 @@ export const ShowPrototypes: React.FC<Props> = () => {
 
     const queryClient = useQueryClient();
     useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ['prototypes', systemId] })
+        queryClient.invalidateQueries({ queryKey: ["prototypes", systemId] });
     }, [queryClient, systemId]);
 
     useEffect(() => {
         const fetchActivePrototype = async () => {
             try {
-                const response = await authAxios.get(`/v1/generator/prototypes/active_prototype/`);
+                const response = await authAxios.get(
+                    `/v1/generator/prototypes/active_prototype/`,
+                );
                 const activePrototypeId = response.data.prototype_id;
                 const isRunning = response.data.running;
 
@@ -37,13 +50,15 @@ export const ShowPrototypes: React.FC<Props> = () => {
                     setPrototypeStatuses(() =>
                         data.reduce((statuses, prototype) => {
                             statuses[prototype.id] =
-                                isRunning && prototype.id === activePrototypeId ? "Running" : "Not running";
+                                isRunning && prototype.id === activePrototypeId
+                                    ? "Running"
+                                    : "Not running";
                             return statuses;
-                        }, {})
+                        }, {}),
                     );
                 }
             } catch (error) {
-                console.error('Error fetching active prototype:', error);
+                console.error("Error fetching active prototype:", error);
             }
         };
 
@@ -53,13 +68,12 @@ export const ShowPrototypes: React.FC<Props> = () => {
         return () => clearInterval(intervalId);
     }, [data]);
 
-
     const handleDelete = async (prototypeId: string) => {
         try {
             await deletePrototype(prototypeId);
             window.location.reload();
         } catch (error) {
-            console.error('Error deleting prototype:', error);
+            console.error("Error deleting prototype:", error);
         }
     };
 
@@ -68,7 +82,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
             await deleteSystemPrototypes(systemId);
             window.location.reload();
         } catch (error) {
-            console.error('Error deleting prototypes:', error);
+            console.error("Error deleting prototypes:", error);
         }
     };
 
@@ -90,7 +104,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
         try {
             await authAxios.post(`/v1/generator/prototypes/run/${prototypeId}`);
         } catch (error) {
-            console.error('Error making run request:', error);
+            console.error("Error making run request:", error);
         } finally {
             setTimeout(() => {
                 setLoading((prev) => ({ ...prev, [prototypeId]: false }));
@@ -103,7 +117,7 @@ export const ShowPrototypes: React.FC<Props> = () => {
         try {
             await authAxios.post(`/v1/generator/prototypes/stop_prototypes/`);
         } catch (error) {
-            console.error('Error making stop request:', error);
+            console.error("Error making stop request:", error);
         } finally {
             setTimeout(() => {
                 setLoading((prev) => ({ ...prev, [prototypeId]: false }));
@@ -113,19 +127,20 @@ export const ShowPrototypes: React.FC<Props> = () => {
 
     const showMetadata = async (prototypeId: string) => {
         try {
-            const response = await authAxios.get(`/v1/generator/prototypes/${prototypeId}/meta`);
+            const response = await authAxios.get(
+                `/v1/generator/prototypes/${prototypeId}/meta`,
+            );
             setMetadata(response.data);
             setShowMetadataModal(true);
-
         } catch (error) {
-            console.error('Error making request:', error);
+            console.error("Error making request:", error);
         }
-    }
+    };
 
     const closeMetadataModal = () => {
         setMetadata("");
         setShowMetadataModal(false);
-    }
+    };
 
     return (
         <>
@@ -138,8 +153,12 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                 <h1 className="text-lg">Prototypes</h1>
                             </span>
                         </th>
-                        <th className="py-2 px-4 text-left border-b border-stone-200 w-52">Status</th>
-                        <th className="py-2 px-4 text-left border-b border-stone-200 w-52">URL</th>
+                        <th className="py-2 px-4 text-left border-b border-stone-200 w-52">
+                            Status
+                        </th>
+                        <th className="py-2 px-4 text-left border-b border-stone-200 w-52">
+                            URL
+                        </th>
                         <th className="py-2 px-4 text-left border-b border-stone-200 w-40 text-right">
                             <Button
                                 onClick={openModal}
@@ -158,7 +177,9 @@ export const ShowPrototypes: React.FC<Props> = () => {
                             <tr key={index} className="hover:bg-gray-50">
                                 <td className="py-2 px-4 text-left border-b border-gray-200">
                                     <h1 className="text-lg">{e.name}</h1>
-                                    <h2 className="text-stone-400">{e.description}</h2>
+                                    <h2 className="text-stone-400">
+                                        {e.description}
+                                    </h2>
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200">
                                     {prototypeStatuses[e.id] || (
@@ -166,44 +187,60 @@ export const ShowPrototypes: React.FC<Props> = () => {
                                     )}
                                 </td>
                                 <td className="py-2 px-4 text-left border-b border-gray-200">
-                                    {(prototypeStatuses[e.id] === "Running") &&
-                                        <a href={prototypeURL} target="_blank" className="text-blue-500 hover:underline">
+                                    {prototypeStatuses[e.id] === "Running" && (
+                                        <a
+                                            href={prototypeURL}
+                                            target="_blank"
+                                            className="text-blue-500 hover:underline"
+                                        >
                                             {prototypeURL}
                                         </a>
-                                    }
+                                    )}
                                 </td>
-                                <td className="py-2 px-4 text-left border-b border-gray-200 w-60 flex space-x-2">
+                                <td className="py-2 px-4 text-left border-b border-gray-200  flex space-x-2">
+                                    <DocsButton prototypeId={e.id} />
+
                                     <button
                                         onClick={() => showMetadata(e.id)}
-                                        className="w-[100px] h-[40px] bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center"
+                                        className="px-2 bg-stone-200 rounded-md hover:bg-stone-300 flex items-center justify-center shrink-0"
                                     >
+                                        <FileText className="size-4 mr-2 shrink-0" />
                                         Metadata
                                     </button>
+
                                     {prototypeStatuses[e.id] === "Running" && (
                                         <button
                                             onClick={() => handleStop(e.id)}
                                             disabled={loading[e.id]}
-                                            className={`w-[60px] h-[40px] rounded-md ${loading[e.id] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-                                                } text-white`}
+                                            className={`w-[60px] h-[40px] rounded-md ${
+                                                loading[e.id]
+                                                    ? "bg-gray-400 cursor-not-allowed"
+                                                    : "bg-blue-500 hover:bg-blue-600"
+                                            } text-white`}
                                         >
                                             Kill
                                         </button>
                                     )}
-                                    {prototypeStatuses[e.id] === "Not running" && (
+                                    {prototypeStatuses[e.id] ===
+                                        "Not running" && (
                                         <button
                                             onClick={() => handleRun(e.id)}
                                             disabled={loading[e.id]}
-                                            className={`w-[60px] h-[40px] rounded-md ${loading[e.id] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-                                                } text-white`}
+                                            className={`flex items-center justify-center px-2 shrink-0 rounded-md ${
+                                                loading[e.id]
+                                                    ? "bg-gray-400 cursor-not-allowed"
+                                                    : "bg-blue-500 hover:bg-blue-600"
+                                            } text-white`}
                                         >
+                                            <Play className="size-4 mr-2 shrink-0" />
                                             Run
                                         </button>
                                     )}
                                     <button
                                         onClick={() => handleDelete(e.id)}
-                                        className="w-[40px] h-[40px] bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center justify-center"
+                                        className="w-[40px] h-[40px] bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center justify-center shrink-0"
                                     >
-                                        <Trash />
+                                        <Trash className="size-5" />
                                     </button>
                                 </td>
                             </tr>
@@ -212,15 +249,15 @@ export const ShowPrototypes: React.FC<Props> = () => {
                 )}
             </table>
 
-            <Modal
-                open={showModal}
-                onClose={closeModal}
-            >
+            <Modal open={showModal} onClose={closeModal}>
                 <ModalDialog>
                     <div className="flex w-full flex-row justify-between pb-1">
                         <div className="flex flex-col">
                             <h1 className="font-bold">Confirm</h1>
-                            <h3 className="text-sm">Are you sure you want to delete all prototypes in this system?</h3>
+                            <h3 className="text-sm">
+                                Are you sure you want to delete all prototypes
+                                in this system?
+                            </h3>
                         </div>
                         <ModalClose
                             sx={{
@@ -232,19 +269,24 @@ export const ShowPrototypes: React.FC<Props> = () => {
                     </div>
                     <Divider />
                     <div className="flex flex-row pt-1 gap-4">
-                        <Button onClick={closeModal} variant="outlined" color="neutral">
+                        <Button
+                            onClick={closeModal}
+                            variant="outlined"
+                            color="neutral"
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={proceedDeleteAll} variant="solid" color="danger">
+                        <Button
+                            onClick={proceedDeleteAll}
+                            variant="solid"
+                            color="danger"
+                        >
                             Confirm
                         </Button>
                     </div>
                 </ModalDialog>
             </Modal>
-            <Modal
-                open={showMetadataModal}
-                onClose={closeMetadataModal}
-            >
+            <Modal open={showMetadataModal} onClose={closeMetadataModal}>
                 <ModalDialog className="max-h-screen overflow-y-auto">
                     <ModalClose
                         sx={{
