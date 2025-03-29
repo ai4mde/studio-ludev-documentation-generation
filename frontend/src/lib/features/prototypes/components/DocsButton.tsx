@@ -115,7 +115,6 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
                                 <button
                                     onClick={() => {
                                         setEditing(!editing);
-                                        console.log("Editing: ", editing);
                                     }}
                                     className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
                                 >
@@ -130,9 +129,9 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
                                             viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
                                         >
                                             <path d="m10 10-6.157 6.162a2 2 0 0 0-.5.833l-1.322 4.36a.5.5 0 0 0 .622.624l4.358-1.323a2 2 0 0 0 .83-.5L14 13.982" />
                                             <path d="m12.829 7.172 4.359-4.346a1 1 0 1 1 3.986 3.986l-4.353 4.353" />
