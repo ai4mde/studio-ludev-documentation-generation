@@ -47,7 +47,7 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
     const generateDocs = async () => {
         try {
             const response = await authAxios.post(
-                `/v1/generator/prototypes/${prototypeId}/docs`,
+                `/v1/generator/prototypes/${prototypeId}/docs/`,
             );
 
             setDocs(response.data);
