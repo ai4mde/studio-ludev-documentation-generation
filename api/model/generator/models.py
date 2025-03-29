@@ -11,3 +11,4 @@ class Prototype(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE)
     metadata = models.JSONField(default=dict)
     database_hash = models.CharField(max_length=256, null=True)
+    documentation = models.TextField(null=True, blank=True, default="")

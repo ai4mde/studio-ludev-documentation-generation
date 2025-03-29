@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from generator.api.schemas import ReadPrototype, CreatePrototype, UpdatePrototype
+from generator.api.schemas import ReadPrototype, CreatePrototype, UpdatePrototype, UpdateDocumentation
 from generator.models import Prototype
 from metadata.models import System
 from ninja import Router
@@ -182,6 +182,36 @@ def generate_prototype_docs(request, id):
                          })
 
     return remove_reply_markdown(reply)
+
+@prototypes.put("/{uuid:id}/docs/", response=str)
+def update_prototype_docs(request, id, documentation: UpdateDocumentation):
+    prototype = Prototype.objects.get(id=id)
+    if not prototype:
+        return 404, "Prototype not found"
+
+    if documentation:
+        prototype.documentation = documentation.documentation
+        prototype.save()
+        return 200, "Documentation updated"
+    else:
+        return 400, "No documentation provided"
+
+@prototypes.get("/{uuid:id}/docs/", response=Dict)
+def get_prototype_docs(request, id):
+    prototype = Prototype.objects.get(id=id)
+    if not prototype:
+        return 404, "Prototype not found"
+
+    if not prototype.documentation:
+        return {
+            "documentation": ""
+        }
+
+    return {
+        "documentation": prototype.documentation
+    }
+
+
 
 
 
