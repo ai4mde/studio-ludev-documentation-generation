@@ -7,9 +7,9 @@ class ReadPrototype(ModelSchema):
         model = Prototype
         fields = [
             "id",
-            "name", 
-            "description", 
-            "system", 
+            "name",
+            "description",
+            "system",
             "database_hash",
         ]
 
@@ -18,9 +18,9 @@ class CreatePrototype(ModelSchema):
     class Meta:
         model = Prototype
         fields = [
-            "name", 
-            "description", 
-            "system", 
+            "name",
+            "description",
+            "system",
             "database_hash",
             "metadata",
         ]
@@ -31,11 +31,18 @@ class UpdatePrototype(ModelSchema):
         model = Prototype
         fields = [
             "id",
-            "name", 
-            "description", 
-            "system", 
+            "name",
+            "description",
+            "system",
             "database_hash"
         ]
 
+class UpdateDocumentation(ModelSchema):
+    class Meta:
+        model = Prototype
+        fields = [
+            "documentation",
+        ]
 
-__all__ = ["ReadPrototype", "CreatePrototype", "UpdatePrototype"]
+
+__all__ = ["ReadPrototype", "CreatePrototype", "UpdatePrototype", "UpdateDocumentation"]
