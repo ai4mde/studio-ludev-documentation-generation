@@ -19,6 +19,8 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
     const [docsLoading, setDocsLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [editing, setEditing] = useState(false);
+    const [generatingDocs, setGeneratingDocs] = useState(false);
+    const [savingDocs, setSavingDocs] = useState("idle");
 
     const showDocs = async () => {
         if (docs.length > 0) {
@@ -27,9 +29,7 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
         }
 
         setDocsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        // Mock GET request to fetch docs
-        setDocs(``);
+        setDocs((await getDocs()) ?? "");
         setShowDocsModal(true);
         setDocsLoading(false);
     };
@@ -46,14 +46,43 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
 
     const generateDocs = async () => {
         try {
+            setGeneratingDocs(true);
             const response = await authAxios.post(
                 `/v1/generator/prototypes/${prototypeId}/docs/`,
             );
+            setGeneratingDocs(false);
 
             setDocs(response.data);
             setShowDocsModal(true);
         } catch (error) {
             console.error("Error generating docs:", error);
+        }
+    };
+
+    const saveDocs: () => Promise<void> = async () => {
+        try {
+            setEditing(false);
+            setSavingDocs("saving");
+            await authAxios.put(
+                `/v1/generator/prototypes/${prototypeId}/docs/`,
+                { documentation: docs },
+            );
+            setSavingDocs("saved");
+            setTimeout(() => setSavingDocs("idle"), 3000);
+        } catch (error) {
+            console.error("Error saving docs:", error);
+        }
+    };
+
+    const getDocs: () => Promise<string> = async () => {
+        try {
+            const response = await authAxios.get(
+                `/v1/generator/prototypes/${prototypeId}/docs/`,
+            );
+
+            return response.data.documentation;
+        } catch (error) {
+            console.error("Error fetching docs:", error);
         }
     };
 
@@ -72,7 +101,7 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
             </button>
 
             <Modal open={showDocsModal} onClose={closeDocs}>
-                <ModalDialog className="max-h-screen overflow-y-auto">
+                <ModalDialog className="max-h-screen overflow-y-auto w-full h-full">
                     <div className="flex gap-2 items-center justify-between">
                         <button
                             onClick={closeDocs}
@@ -114,10 +143,16 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
                                 </button>
 
                                 <button
-                                    onClick={() => {}}
+                                    onClick={saveDocs}
                                     className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
                                 >
-                                    <Save className="size-5" />
+                                    {savingDocs === "saving" ? (
+                                        <Loader2 className="animate-spin size-5" />
+                                    ) : savingDocs === "saved" ? (
+                                        <Check className="size-5" />
+                                    ) : (
+                                        <Save className="size-5" />
+                                    )}
                                 </button>
 
                                 <button
@@ -142,18 +177,45 @@ export function DocsButton({ prototypeId }: { prototypeId: string }) {
                                 </button>
                             </div>
                         ) : (
-                            <button
-                                onClick={generateDocs}
-                                className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
-                            >
-                                <BookPlus className="size-5" />
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={saveDocs}
+                                    className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
+                                    disabled={generatingDocs}
+                                >
+                                    {savingDocs === "saving" ? (
+                                        <Loader2 className="animate-spin size-5" />
+                                    ) : savingDocs === "saved" ? (
+                                        <Check className="size-5" />
+                                    ) : (
+                                        <Save className="size-5" />
+                                    )}
+                                </button>
+                                <button
+                                    onClick={generateDocs}
+                                    className="w-[40px] h-[40px] bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center shrink-0"
+                                >
+                                    {generatingDocs ? (
+                                        <Loader2 className="animate-spin size-5" />
+                                    ) : (
+                                        <BookPlus className="size-5" />
+                                    )}
+                                </button>
+                            </div>
                         )}
                     </div>
 
                     <div className="flex h-full w-full flex-col gap-1 p-3">
                         {docs ? (
-                            <pre contentEditable={editing}>{docs}</pre>
+                            <textarea
+                                value={docs}
+                                onChange={(e) =>
+                                    setDocs(e.currentTarget.value || "")
+                                }
+                                suppressContentEditableWarning
+                                className="w-full h-full border rounded-md p-2 max-w-none"
+                                style={{ width: "100% !important" }}
+                            />
                         ) : (
                             <p>No documentation available. Generate it.</p>
                         )}
