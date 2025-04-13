@@ -174,7 +174,7 @@ def generate_prototype_docs(request, id):
         return 404, "Prototype not found"
 
     reply = llm_handler(prompt_name = "PROTOTYPE_GENERATE_DOCUMENTATION",
-                         model = "llama-3.2-1b-preview",
+                         model = "llama3-70b-8192",
                          input_data = {
                             "name": prototype.name,
                             "description": prototype.description,
