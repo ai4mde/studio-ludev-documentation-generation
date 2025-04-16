@@ -46,4 +46,11 @@ Ensure the documentation covers the following sections:
 - Ensure the documentation is well-structured, clear, and user-friendly for developers and system administrators.
 
  Make sure the output documentation is well-structured, thorough, and clearly written.
+ 
+ IMPORTANT:
+- Do NOT hallucinate missing data.
+- Clearly mark any fields or sections where information is incomplete, missing, or not provided using standardized statements as listed above.
+- Use only the information from the given input.
+- Do not provide the identifiers from the data as it clutters the data
+- When the Diagrams are empty, DO NOT mentions them in the documentation
 """

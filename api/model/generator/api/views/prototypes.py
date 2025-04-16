@@ -68,7 +68,30 @@ def create_prototype(request, prototype: CreatePrototype, database_prototype_nam
     if response.status_code != 200:
         raise Exception("Failed to generate prototype " + prototype.name)
 
+    if prototype.metadata.get("runAfterGeneration", False):
+        try:
+            from llm.handler import llm_handler, remove_reply_markdown
+
+            doc_reply = llm_handler(
+                prompt_name="PROTOTYPE_GENERATE_DOCUMENTATION",
+                model="llama3-70b-8192",
+                input_data={
+                    "name": new_prototype.name,
+                    "description": new_prototype.description,
+                    "metadata": new_prototype.metadata,
+                }
+            )
+
+            documentation = remove_reply_markdown(doc_reply)
+
+            new_prototype.documentation = documentation
+            new_prototype.save()
+
+        except Exception as e:
+            print(f"[!] Failed to auto-generate documentation: {e}")
+
     return new_prototype
+    
 
 
 @prototypes.delete("/{uuid:id}/", response=bool)
@@ -174,7 +197,7 @@ def generate_prototype_docs(request, id):
         return 404, "Prototype not found"
 
     reply = llm_handler(prompt_name = "PROTOTYPE_GENERATE_DOCUMENTATION",
-                         model = "llama-3.2-1b-preview",
+                         model = "llama3-70b-8192",
                          input_data = {
                             "name": prototype.name,
                             "description": prototype.description,

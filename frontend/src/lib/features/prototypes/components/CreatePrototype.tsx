@@ -51,6 +51,8 @@ export const CreatePrototype: React.FC = () => {
     const [databaseHash, setDatabaseHash] = useState<string | null>(null);
     const [databasePrototypes, setDatabasePrototypes] = useState([]);
     const [selectedDatabasePrototype, setSelectedDatabasePrototype] = useState(null);
+    const [runAfterGeneration, setRunAfterGeneration] = useState(true);
+
 
     useEffect(() => {
         if (isSuccessInterfaces && interfaces) {
@@ -138,6 +140,7 @@ export const CreatePrototype: React.FC = () => {
             "diagrams": diagrams,
             "interfaces": selectedInterfaces,
             "useAuthentication": useAuthentication,
+            runAfterGeneration,
         };
 
         const alphanumericRegex = /^[a-zA-Z0-9]+$/;
@@ -243,6 +246,15 @@ export const CreatePrototype: React.FC = () => {
                                 onChange={(e) => setUseAuthentication(e.target.checked)}
                             />
                             <FormLabel sx={{ marginTop: '4px' }}>Use Authentication</FormLabel>
+                        </span>
+                    </FormControl>
+                    <FormControl>
+                        <span className="flex flex-row items-center gap-2">
+                            <Switch
+                                checked={runAfterGeneration}
+                                onChange={(e) => setRunAfterGeneration(e.target.checked)}
+                            />
+                            <FormLabel sx={{ marginTop: '4px' }}>Generate Documentation</FormLabel>
                         </span>
                     </FormControl>
                 </form>
