@@ -4,6 +4,12 @@ from generator.models import Prototype
 from metadata.models import Project, System
 from django.contrib.auth.models import User
 from uuid import uuid4
+from django.test import TestCase
+from unittest.mock import patch
+from django.test import Client
+from llm.handler import llm_handler, remove_reply_markdown
+from generator.api.views.prototypes import generate_prototype_docs
+import uuid
 
 prototype_metadata = {
     "diagrams": [],
@@ -79,3 +85,36 @@ class PrototypeAPITests(APITestCase):
         response = self.client.get(self.url, {'system': uuid4()}) # Random uuid
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 0)  # No prototypes
+
+
+    ### Documentation Generation unit tests   
+    @patch("generator.api.views.prototypes.llm_handler")
+    @patch("generator.api.views.prototypes.remove_reply_markdown")
+    def test_generate_prototype_docs(self, mock_remove_reply_markdown, mock_llm_handler):
+        """
+        Mocks LLM and markdown cleaning
+        Checks that the endpoint returns cleaned LLM output
+        """
+
+        mock_llm_handler.return_value = "### mocked doc"
+        mock_remove_reply_markdown.return_value = "mocked doc"
+        url = reverse('api-0.0.1:generate_prototype_docs', kwargs={'id': self.prototype1.id})
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), "mocked doc")
+
+
+    @patch("generator.api.views.prototypes.Prototype.objects.get")
+    def test_generate_prototype_docs_prototype_not_found(self, mock_get):
+        """
+        Simulates `Prototype.DoesNotExist`
+        Verifies that the API returns 404 and correct error message
+        """
+        mock_get.side_effect = Prototype.DoesNotExist  
+        non_existent_uuid = uuid.uuid4() 
+        url = reverse('api-0.0.1:generate_prototype_docs', kwargs={'id': non_existent_uuid})
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), "Prototype not found")

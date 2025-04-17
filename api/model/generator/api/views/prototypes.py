@@ -7,6 +7,7 @@ import json
 import requests
 import os
 from llm.handler import llm_handler, remove_reply_markdown
+from ninja.responses import Response
 
 prototypes = Router()
 
@@ -190,19 +191,22 @@ def get_active_prototype(request):
 
 
 
-@prototypes.post("/{uuid:id}/docs/", response=str)
+@prototypes.post("/{uuid:id}/docs/", response={200: str, 404: str})
 def generate_prototype_docs(request, id):
-    prototype = Prototype.objects.get(id=id)
-    if not prototype:
-        return 404, "Prototype not found"
+    try:
+        prototype = Prototype.objects.get(id=id)
+    except Prototype.DoesNotExist:
+        return Response("Prototype not found", status=404)
 
-    reply = llm_handler(prompt_name = "PROTOTYPE_GENERATE_DOCUMENTATION",
-                         model = "llama3-70b-8192",
-                         input_data = {
-                            "name": prototype.name,
-                            "description": prototype.description,
-                            "metadata": prototype.metadata,
-                         })
+    reply = llm_handler(
+        prompt_name="PROTOTYPE_GENERATE_DOCUMENTATION",
+        model="llama3-70b-8192",
+        input_data={
+            "name": prototype.name,
+            "description": prototype.description,
+            "metadata": prototype.metadata,
+        }
+    )
 
     return remove_reply_markdown(reply)
 
