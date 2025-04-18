@@ -24,6 +24,7 @@ jobs:
       - name: Run tests
         working-directory: ./frontend
         run: yarn test
+
   run-backend-tests:
     runs-on: ubuntu-latest
     env:
@@ -48,7 +49,7 @@ jobs:
           
       - name: Run unit tests
         working-directory: ./api
-        run: python unittest discover 
+        run: python -m unittest discover 
         #Automatically discover and run tests in the current directory and its 
         #subdirectories (in ./api)
 
@@ -58,6 +59,21 @@ jobs:
       LANG: C.UTF-8
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+      - run: poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: |
+          poetry install --no-root |& cat
+          poetry add pylint --dev
 
       - name: Run Pylint
         working-directory: ./api
