@@ -1,43 +1,38 @@
-import os
+from os import environ
 from pathlib import Path
-from dotenv import load_dotenv
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-# Load environment variables from .env
-load_dotenv()
-
-# Initialize Sentry if DSN is provided
-if os.environ.get("SENTRY_DSN"):
+if environ.get("SENTRY_DSN"):
     sentry_sdk.init(
-        dsn=os.environ.get("SENTRY_DSN"),
+        dsn=environ.get("SENTRY_DSN"),
         integrations=[DjangoIntegration()],
         auto_session_tracking=False,
         traces_sample_rate=0
     )
 
-# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Secret Key
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "16600cc09a28b8dd3b4b8e7cfb4e81ff7958a87ab81809386ba7dcff9d68547e"
+SECRET_KEY = environ.get(
+    "SECRET_KEY", "16600cc09a28b8dd3b4b8e7cfb4e81ff7958a87ab81809386ba7dcff9d68547e"
 )
 
-# Debug & Hosts
-DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
-ALLOWED_HOSTS = ["*"] if DEBUG else [os.environ.get("HOSTNAME", "api.ai4mde.localhost"), "localhost"]
 
-# Installed Apps
+# TODO: Find a more elegant solution for this
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
+
+if environ.get("DEBUG", "True").lower() == "false":
+    DEBUG = False
+    ALLOWED_HOSTS = [environ.get("HOSTNAME", "api.ai4mde.localhost"), "localhost"]
+
 INSTALLED_APPS = [
-    "daphne",  # ASGI server
-    "model",
-    "metadata",
-    "diagram",
-    "prompt",
-    "prose",
-    "generator",
+    "daphne",  # ext: Use Daphne as ASGI server
+    "model",  # The main app / project is the model application
+    "metadata",  # The metadata app is used to store metadata such as projects, systems, users and so on
+    "diagram",  # The diagram app is used to store diagram-specific data
+    "prompt",  # The prompt app is used for the chat / prompting functionalities
+    "prose",  # The prose app is used to store and build NLP pipelines
+    "generator", # The generator app is used to store and build prototypes
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,7 +43,6 @@ INSTALLED_APPS = [
     "drf_yasg",
 ]
 
-# Middleware
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -60,12 +54,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# URL & WSGI/ASGI
 ROOT_URLCONF = "model.urls"
-WSGI_APPLICATION = "model.wsgi.application"
-ASGI_APPLICATION = "model.asgi.application"
 
-# Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -82,19 +72,22 @@ TEMPLATES = [
     },
 ]
 
-# Database
+WSGI_APPLICATION = "model.wsgi.application"
+ASGI_APPLICATION = "model.asgi.application"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),  # <-- fallback for local dev
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        "NAME": os.environ.get("POSTGRES_DB", "ai4mdestudio"),
-        "USER": os.environ.get("POSTGRES_USER", "ai4mdestudio"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "ai4mdestudio"),
+        "HOST": environ.get(
+            "POSTGRES_HOST", "postgres"
+        ),  # Change this to localhost if can't use docker networking
+        "PORT": environ.get("POSTGRES_PORT", "5432"),
+        "NAME": environ.get("POSTGRES_DB", "ai4mdestudio"),
+        "USER": environ.get("POSTGRES_USER", "ai4mdestudio"),
+        "PASSWORD": environ.get("POSTGRES_PASSWORD", "ai4mdestudio"),
     }
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -110,44 +103,34 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
-# Static files
 STATIC_URL = "static/"
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# CSRF & CORS
-HOSTNAME = os.environ.get("HOSTNAME", "api.ai4mde.localhost")
-STUDIO_HOSTNAME = os.environ.get("STUDIO_HOSTNAME", "ai4mde.localhost")
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"  # TODO: Investigate if need to change this to UUIDField
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
+    "http://localhost",  # TODO: Setup some environment variables for this
     "http://localhost:5173",
-    f"http://{HOSTNAME}",
-    f"https://{HOSTNAME}",
-    f"http://{STUDIO_HOSTNAME}",
-    f"https://{STUDIO_HOSTNAME}",
+    "http://" + environ.get("HOSTNAME", "api.ai4mde.localhost"),
+    "https://" + environ.get("HOSTNAME", "api.ai4mde.localhost"),
+    "http://" + environ.get("STUDIO_HOSTNAME", "ai4mde.localhost"),
+    "https://" + environ.get("STUDIO_HOSTNAME", "ai4mde.localhost"),
+
 ]
+CSRF_COOKIE_DOMAIN = '.'.join(environ.get("HOSTNAME", "ai4mde.localhost").split('.')[1:])  # TODO: Test & investigate how to fix this stuff, so we can run from localhost:5173
+CORS_ALLOW_ALL_ORIGINS = True  # TODO: Not in PROD!
+CORS_ALLOW_CREDENTIALS = True  # TODO: Investigate if necessary?
+CSRF_COOKIE_HTTPONLY = False  # TODO: Is this even used?
 
-CSRF_COOKIE_DOMAIN = ".".join(HOSTNAME.split(".")[1:])
-CORS_ALLOW_ALL_ORIGINS = True  # ⚠️ Don't use this in production!
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_HTTPONLY = False
+PROSE_API_KEY = (
+    "sequoias"  # TODO: Leverage the JWT to make connections to the Prose API
+)
 
-# App-specific
-PROSE_API_KEY = os.environ.get("PROSE_API_KEY", "sequoias")
-
-# Swagger / drf_yasg
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {
-        "Basic": {
-            "type": "basic"
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
         }
     }
 }
