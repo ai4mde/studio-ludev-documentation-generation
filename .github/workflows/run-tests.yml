@@ -45,12 +45,18 @@ jobs:
         run: |
           poetry install --no-root |& cat
           poetry add pylint --dev
+          
+      #- name: Run unit tests
+      #  working-directory: ./api
+      #  run: |
+
+  run-backend-lint:
+    runs-on: ubuntu-latest
+    env:
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Run Pylint
         working-directory: ./api
-        run: poetry run pylint ./
-
-      #- name: Run tests
-      #  working-directory: ./api
-      #  run: |
-          
+        run: poetry run pylint ./  #Add only the files you want to lint!
