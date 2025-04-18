@@ -49,7 +49,7 @@ jobs:
           
       - name: Run unit tests
         working-directory: ./api
-        run: python -m unittest model/generator/api/views/tests.py
+        run: python -m unittest model/generator/tests.py
         #Run the tests in the specified file
 
   run-backend-lint:
