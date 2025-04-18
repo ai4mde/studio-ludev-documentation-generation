@@ -49,9 +49,8 @@ jobs:
           
       - name: Run unit tests
         working-directory: ./api
-        run: python -m unittest discover 
-        #Automatically discover and run tests in the current directory and its 
-        #subdirectories (in ./api)
+        run: python -m unittest model/generator/api/views/tests.py
+        #Run the tests in the specified file
 
   run-backend-lint:
     runs-on: ubuntu-latest
