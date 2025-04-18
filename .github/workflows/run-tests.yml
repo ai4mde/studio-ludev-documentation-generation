@@ -46,9 +46,11 @@ jobs:
           poetry install --no-root |& cat
           poetry add pylint --dev
           
-      #- name: Run unit tests
-      #  working-directory: ./api
-      #  run: |
+      - name: Run unit tests
+        working-directory: ./api
+        run: python unittest discover 
+        #Automatically discover and run tests in the current directory and its 
+        #subdirectories (in ./api)
 
   run-backend-lint:
     runs-on: ubuntu-latest
