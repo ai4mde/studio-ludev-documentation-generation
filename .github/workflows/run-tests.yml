@@ -32,6 +32,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Start containers
+        run: docker-compose -f "docker-compose.yml" up -d --build
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -51,6 +54,10 @@ jobs:
         working-directory: ./api
         run: python -m unittest model/generator/tests.py
         #Run the tests in the specified file
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down
 
   run-backend-lint:
     runs-on: ubuntu-latest
