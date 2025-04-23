@@ -1,0 +1,86 @@
+name: run-unit-tests
+
+on:
+  pull_request:
+    branches:
+      - develop-prototype-documentation
+  push:
+    branches:
+      - develop-prototype-documentation
+
+jobs:
+  run-frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yarn
+        run: npm i -g yarn
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: yarn
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: yarn test
+
+  run-backend-tests:
+    runs-on: ubuntu-latest
+    env:
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start containers
+        run: docker compose -f "docker-compose.yaml" up -d --build
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+      - run: poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: |
+          poetry install --no-root |& cat
+          poetry add pylint --dev
+          
+      - name: Run unit tests
+        working-directory: ./api/model
+        run: POSTGRES_HOST=localhost python manage.py test
+        #Run the tests in the specified file
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f "docker-compose.yaml" down
+
+  run-backend-lint:
+    runs-on: ubuntu-latest
+    env:
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+      - run: poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: |
+          poetry install --no-root |& cat
+          poetry add pylint --dev
+
+      - name: Run Pylint
+        working-directory: ./api
+        run: poetry run pylint ./  #Add only the files you want to lint!
