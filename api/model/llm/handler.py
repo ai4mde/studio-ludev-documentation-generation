@@ -32,27 +32,28 @@ def call_openai(model: str, prompt: str) -> str:
         raise Exception("Failed to call LLM, error " + str(e))
 
 
-def call_groq(model: str, prompt: str) -> str:
+def call_groq(model: str, prompt: str, temperature: float = 0.5) -> str:
     client = Groq(
         api_key=os.environ.get("GROQ_API_KEY"),
     )
     try: 
         chat_completion = client.chat.completions.create(
-        messages = [
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-            model = model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model=model,
+            temperature=temperature, 
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
         raise Exception("Failed to call LLM, error " + str(e))
 
 
-def llm_handler(prompt_name: str, model: str = "mixtral-8x7b-32768", input_data: Dict[str, Any] = {}) -> str:
 
+def llm_handler(prompt_name: str, model: str = "mixtral-8x7b-32768", input_data: Dict[str, Any] = {}, temperature: float = 0.5) -> str:
     if not input_data:
         raise Exception("No input data given")
     
@@ -66,6 +67,6 @@ def llm_handler(prompt_name: str, model: str = "mixtral-8x7b-32768", input_data:
         raise Exception("Invalid prompt name")
     
     if model == 'gpt-4o':
-        return call_openai(model = model, prompt = prompt)
+        return call_openai(model=model, prompt=prompt)
     else:
-        return call_groq(model = model, prompt = prompt)
+        return call_groq(model=model, prompt=prompt, temperature=temperature)
