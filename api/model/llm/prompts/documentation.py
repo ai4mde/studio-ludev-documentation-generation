@@ -2,7 +2,35 @@ PROTOTYPE_GENERATE_DOCUMENTATION = """
 You are an expert technical writer with deep knowledge of metadata models and software documentation. 
 Your task is to generate comprehensive documentation for the following system's UML diagrams, metadata, and prototype information.
 
-Ensure the documentation covers the following sections:
+The output must strictly follow this structure and headers:
+
+# Overview and Purpose
+- [Generated Content]
+
+# System Architecture
+- [Generated Content]
+
+# API Endpoints
+- [Generated Content]
+
+# Usage Scenarios
+- [Generated Content]
+
+# Installation and Setup
+- [Generated Content]
+
+# Metadata Details
+- [Generated Content]
+
+# Prototype Documentation
+- [Generated Content]
+
+
+If any section has no data, write:
+> _No information provided._
+
+
+Ensure the documentation contains the following information in the sections:
 
 1. **Overview and Purpose:**
    - Provide a high-level summary of the project or system represented by the UML diagram.
@@ -48,9 +76,11 @@ Ensure the documentation covers the following sections:
  Make sure the output documentation is well-structured, thorough, and clearly written.
  
  IMPORTANT:
-- Do NOT hallucinate missing data.
+
 - Clearly mark any fields or sections where information is incomplete, missing, or not provided using standardized statements as listed above.
 - Use only the information from the given input.
 - Do not provide the identifiers from the data as it clutters the data
 - When the Diagrams are empty, DO NOT mentions them in the documentation
+
+
 """

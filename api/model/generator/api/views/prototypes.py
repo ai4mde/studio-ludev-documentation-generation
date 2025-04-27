@@ -51,8 +51,9 @@ def create_prototype(request, prototype: CreatePrototype, database_prototype_nam
         description=prototype.description,
         system=System.objects.get(pk=prototype.system),
         database_hash=prototype.database_hash,
-        metadata=prototype.metadata # TODO: maybe we do not want to push all metadata to the DB?
+        metadata=prototype.metadata  # TODO: maybe we do not want to push all metadata to the DB?
     )
+    
     GENERATION_URL = f"{PROTOTYPE_API_URL}/generate"
     data = {
         'id': str(new_prototype.id),
@@ -60,38 +61,43 @@ def create_prototype(request, prototype: CreatePrototype, database_prototype_nam
         'system': str(prototype.system),
         'metadata': json.dumps(prototype.metadata)
     }
-    # TODO: database retrieval should be done using ids
+    
     if database_prototype_name and database_prototype_name != "":
         data['database_prototype_name'] = database_prototype_name
+    
     response = requests.post(GENERATION_URL, json=data)
-
     if response.status_code != 200:
         raise Exception("Failed to generate prototype " + prototype.name)
 
     if prototype.metadata.get("runAfterGeneration", False):
-        try:
-            from llm.handler import llm_handler, remove_reply_markdown
-
-            doc_reply = llm_handler(
-                prompt_name="PROTOTYPE_GENERATE_DOCUMENTATION",
-                model="llama3-70b-8192",
-                input_data={
-                    "name": new_prototype.name,
-                    "description": new_prototype.description,
-                    "metadata": new_prototype.metadata,
-                }
-            )
-
-            documentation = remove_reply_markdown(doc_reply)
-
-            new_prototype.documentation = documentation
-            new_prototype.save()
-
-        except Exception as e:
-            print(f"[!] Failed to auto-generate documentation: {e}")
+        diagram_list = prototype.metadata.get("diagrams", [])
+        
+        if len(diagram_list) < 4:
+            # Not enough diagrams, fill documentation with a warning message
+            documentation = f"Not enough diagrams ({len(diagram_list)}) to generate documentation. Please create at least 4 diagrams."
+            print(f"[i] {documentation}")
+        else:
+            # Enough diagrams, generating documentation via LLM
+            try:
+                doc_reply = llm_handler(
+                    prompt_name="PROTOTYPE_GENERATE_DOCUMENTATION",
+                    model="llama3-70b-8192",
+                    input_data={
+                        "name": new_prototype.name,
+                        "description": new_prototype.description,
+                        "metadata": new_prototype.metadata,
+                    }
+                )
+                documentation = remove_reply_markdown(doc_reply)
+            except Exception as e:
+                documentation = f"Failed to generate documentation due to an error: {e}"
+                print(f"[!] {documentation}")
+        
+        new_prototype.documentation = documentation
+        new_prototype.save()
 
     return new_prototype
-    
+
 
 
 @prototypes.delete("/{uuid:id}/", response=bool)
@@ -196,15 +202,36 @@ def generate_prototype_docs(request, id):
     if not prototype:
         return 404, "Prototype not found"
 
-    reply = llm_handler(prompt_name = "PROTOTYPE_GENERATE_DOCUMENTATION",
-                         model = "llama3-70b-8192",
-                         input_data = {
-                            "name": prototype.name,
-                            "description": prototype.description,
-                            "metadata": prototype.metadata,
-                         })
+    diagram_list = prototype.metadata.get("diagrams", [])
+    
+    if len(diagram_list) < 4:
+        # Not enough diagrams, return a warning message
+        documentation = (
+            f"Not enough diagrams ({len(diagram_list)}) to generate documentation. "
+            f"Please create at least 4 diagrams."
+        )
+        print(f"Documentation generation skipped for prototype: {prototype.name}: not enough diagrams.")
+    else:
+        try:
+            # Enough diagrams, call LLM to generate documentation
+            reply = llm_handler(
+                prompt_name="PROTOTYPE_GENERATE_DOCUMENTATION",
+                model="llama3-70b-8192",
+                input_data={
+                    "name": prototype.name,
+                    "description": prototype.description,
+                    "metadata": prototype.metadata,
+                }
+            )
+            documentation = remove_reply_markdown(reply)
+            print(f"[+] Documentation successfully generated for prototype: {prototype.name}.")
+        except Exception as e:
+            # Error during LLM call
+            documentation = f"Failed to generate documentation due to an error: {str(e)}"
+            print(f"Documentation generation failed for prototype: {prototype.name}: {str(e)}")
 
-    return remove_reply_markdown(reply)
+    return documentation
+
 
 @prototypes.put("/{uuid:id}/docs/", response=str)
 def update_prototype_docs(request, id, documentation: UpdateDocumentation):
